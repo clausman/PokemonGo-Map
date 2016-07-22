@@ -126,10 +126,11 @@ $(function() {
                     marker.infoWindow.open(map, marker);
                 });
 
-                markers.push({
+                var markersItem = {
                     m: marker,
                     disapear: item.disappear_time
-                });
+                };
+                markers.push(markersItem);
 
                 marker.addListener('mouseover', function () {
                     marker.infoWindow.open(map, marker);
@@ -140,6 +141,13 @@ $(function() {
                         marker.infoWindow.close();
                     }
                 });
+                setTimeout(function(){
+                    var index = markers.indexOf(markersItem);
+                    if (index > -1) {
+                        markers.splice(index, 1);
+                    }
+                    marker.setMap(null);
+                }, item.disappear_time - new Date().valueOf())
             });
         }).always(function () {
             setTimeout(function () {

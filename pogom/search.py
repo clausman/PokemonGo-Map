@@ -97,6 +97,6 @@ def search_loop(args):
     # while True:
     num_steps = args.step_limit
     position = args.position
-    search(num_steps, position)
+    search(position, num_steps)
     log.info("Scanning complete.")
     # time.sleep(1)
