@@ -141,13 +141,6 @@ $(function() {
                         marker.infoWindow.close();
                     }
                 });
-                setTimeout(function(){
-                    var index = markers.indexOf(markersItem);
-                    if (index > -1) {
-                        markers.splice(index, 1);
-                    }
-                    marker.setMap(null);
-                }, item.disappear_time - new Date().valueOf())
             });
         }).always(function () {
             setTimeout(function () {
@@ -161,10 +154,15 @@ $(function() {
         lastStamp = dObj.getTime();
 
         $.each(markers, function (i, item) {
-            if (item.disapear <= lastStamp - (dObj.getTimezoneOffset() * 60000))
+            if (item.disapear <= lastStamp) {
                 item.m.setMap(null);
+            }
         });
     };
+
+    function removePokemon(marker) {
+        var index =
+    }
 
     GetNewGyms = function () {
         $.getJSON("/gyms", function (result) {
