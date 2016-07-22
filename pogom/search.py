@@ -48,31 +48,29 @@ def generate_location_steps(initial_location, num_steps):
         x, y = x + dx, y + dy
 
 
-def login(args, position):
+def login(auth_service, username, password, position):
     log.info('Attempting login to Pokemon Go.')
 
     api.set_position(*position)
 
-    while not api.login(args.auth_service, args.username, args.password):
+    while not api.login(auth_service, username, password):
         log.info('Failed to login to Pokemon Go. Trying again.')
         time.sleep(REQ_SLEEP)
 
     log.info('Login to Pokemon Go successful.')
 
 
-def search(args):
-    num_steps = args.step_limit
-    position = (config['ORIGINAL_LATITUDE'], config['ORIGINAL_LONGITUDE'], 0)
-
+def search(position, num_steps, sleep=REQ_SLEEP):
+    auth_service, username, password = config['AUTH_SERVICE'], config['USERNAME'], config['PASSWORD']
     if api._auth_provider and api._auth_provider._ticket_expire:
         remaining_time = api._auth_provider._ticket_expire/1000 - time.time()
 
         if remaining_time > 60:
             log.info("Skipping Pokemon Go login process since already logged in for another {:.2f} seconds".format(remaining_time))
         else:
-            login(args, position)
+            login(auth_service, username, password, position)
     else:
-        login(args, position)
+        login(auth_service, username, password, position)
 
     i = 1
     for step_location in generate_location_steps(position, num_steps):
@@ -88,15 +86,17 @@ def search(args):
         try:
             parse_map(response_dict)
         except KeyError:
-            log.error('Scan step failed. Response dictionary key error.')
+            log.exception('Scan step failed. Response dictionary key error.')
 
         log.info('Completed {:5.2f}% of scan.'.format(float(i) / num_steps**2*100))
         i += 1
-        time.sleep(REQ_SLEEP)
+        time.sleep(sleep)
 
 
 def search_loop(args):
-    while True:
-        search(args)
-        log.info("Scanning complete.")
-        time.sleep(1)
+    # while True:
+    num_steps = args.step_limit
+    position = args.position
+    search(num_steps, position)
+    log.info("Scanning complete.")
+    # time.sleep(1)

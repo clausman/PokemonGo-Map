@@ -7,5 +7,8 @@ config = {
     'ROOT_PATH': None,
     'ORIGINAL_LATITUDE': None,
     'ORIGINAL_LONGITUDE': None,
-    'GMAPS_KEY': None
+    'GMAPS_KEY': None,
+    'USERNAME': None,
+    'PASSWORD': None,
+    'AUTH_SERVICE': None
 }

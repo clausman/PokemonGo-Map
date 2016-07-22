@@ -46,6 +46,10 @@ if __name__ == '__main__':
 
     config['ORIGINAL_LATITUDE'] = position[0]
     config['ORIGINAL_LONGITUDE'] = position[1]
+    config['USERNAME'] = args.username
+    config['PASSWORD'] = args.password
+    config['AUTH_SERVICE'] = args.auth_service
+    args.position = position
 
     if args.ignore:
         Pokemon.IGNORE = [i.lower().strip() for i in args.ignore.split(',')]
@@ -68,6 +72,7 @@ if __name__ == '__main__':
 
     app = Pogom(__name__)
     config['ROOT_PATH'] = app.root_path
+
     if args.gmaps_key is not None:
         config['GMAPS_KEY'] = args.gmaps_key
     else:
