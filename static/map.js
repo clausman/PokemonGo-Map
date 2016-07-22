@@ -160,6 +160,10 @@ $(function() {
         });
     };
 
+    function removePokemon(marker) {
+        var index =
+    }
+
     GetNewGyms = function () {
         $.getJSON("/gyms", function (result) {
             $.each(result, function (i, item) {
