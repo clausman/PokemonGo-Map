@@ -274,7 +274,7 @@ $(function() {
     };
 
     window.setInterval(setLabelTime, 1000);
-    var searchId = window.setInterval(searchPokemon, 30*1000);
+    var searchId = window.setInterval(searchPokemon, 60*1000);
 
     initMap();
 });

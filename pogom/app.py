@@ -63,7 +63,7 @@ class Pogom(Flask):
         else:
             step_limit = 1
 
-        sleep = 0.1
+        sleep = 0.0
         search_thread = Thread(target=search, args=(position, step_limit, sleep))
         search_thread.daemon = True
         search_thread.name = 'search'

@@ -19,7 +19,8 @@ from .models import parse_map
 log = logging.getLogger(__name__)
 
 TIMESTAMP = '\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000'
-REQ_SLEEP = 1
+REQ_SLEEP = 10
+AUTH_SLEEP = 30
 api = PGoApi()
 
 
@@ -55,7 +56,7 @@ def login(auth_service, username, password, position):
 
     while not api.login(auth_service, username, password):
         log.info('Failed to login to Pokemon Go. Trying again.')
-        time.sleep(REQ_SLEEP)
+        time.sleep(AUTH_SLEEP)
 
     log.info('Login to Pokemon Go successful.')
 
@@ -87,6 +88,7 @@ def search(position, num_steps, sleep=REQ_SLEEP):
             parse_map(response_dict)
         except KeyError:
             log.exception('Scan step failed. Response dictionary key error.')
+            log.exception(response_dict)
 
         log.info('Completed {:5.2f}% of scan.'.format(float(i) / num_steps**2*100))
         i += 1
