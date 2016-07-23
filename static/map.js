@@ -13,7 +13,7 @@ $(function() {
         return number <= 99 ? ("0" + number).slice(-2) : number;
     };
 
-    pokemonLabel = function (item) {
+    function pokemonLabel (item) {
         disappear_date = new Date(item.disappear_time);
 
         var str = '\
@@ -35,7 +35,7 @@ $(function() {
         return str;
     };
 
-    gymLabel = function gymLabel(item) {
+    function gymLabel(item) {
         var gym_color = ["0, 0, 0, .4", "74, 138, 202, .6", "240, 68, 58, .6", "254, 217, 40, .6"];
         var str;
         if (gym_types[item.team_id] == 0) {
@@ -64,7 +64,7 @@ $(function() {
         return str;
     };
 
-    pokestopLabel = function pokestopLabel(item) {
+    function pokestopLabel(item) {
         var str;
 
         if (!item.lure_expiration) {
@@ -83,26 +83,67 @@ $(function() {
         return str;
     }
 
-    initMap = function () {
+    function CenterControl(controlDiv, map) {
+
+        // Set CSS for the control border.
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = '#fff';
+        controlUI.style.border = '2px solid #fff';
+        controlUI.style.borderRadius = '3px';
+        controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.marginBottom = '22px';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to scan around you the map';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior.
+        var controlText = document.createElement('div');
+        controlText.style.color = 'rgb(25,25,25)';
+        controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+        controlText.style.fontSize = '16px';
+        controlText.style.lineHeight = '38px';
+        controlText.style.paddingLeft = '5px';
+        controlText.style.paddingRight = '5px';
+        controlText.innerHTML = 'Scan';
+        controlUI.appendChild(controlText);
+
+        // Setup the click event listeners: simply set the map to Chicago.
+        controlUI.addEventListener('click', function() {
+            var center = map.getCenter();
+            searchPokemon(center);
+        });
+
+    }
+
+    function initMap () {
         map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: center_lat, lng: center_lng},
             zoom: 16
         });
+
+        // Create the DIV to hold the control and call the CenterControl()
+        // constructor passing in this DIV.
+        var centerControlDiv = document.createElement('div');
+        var centerControl = new CenterControl(centerControlDiv, map);
+
+        centerControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(centerControlDiv);
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
-                initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                var initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 map.setCenter(initialLocation);
+                searchPokemon(initialLocation);
             });
         }
         GeoMarker = new GeolocationMarker(map);
         GetNewPokemons(lastStamp);
         GetNewGyms();
         GetNewPokeStops();
-
-        searchPokemon();
     };
 
-    GetNewPokemons = function (stamp) {
+    function GetNewPokemons (stamp) {
         $.getJSON("/pokemons/" + stamp, function (result) {
             $.each(result, function (i, item) {
 
@@ -160,7 +201,7 @@ $(function() {
         });
     };
 
-    GetNewGyms = function () {
+    function GetNewGyms () {
         $.getJSON("/gyms", function (result) {
             $.each(result, function (i, item) {
                 var marker = new google.maps.Marker({
@@ -196,7 +237,7 @@ $(function() {
         });
     };
 
-    GetNewPokeStops = function () {
+    function GetNewPokeStops () {
         $.getJSON("/pokestops", function (result) {
             $.each(result, function (i, item) {
                 var imagename = item.lure_expiration ? "PstopLured" : "Pstop";
@@ -239,7 +280,7 @@ $(function() {
         });
     };
 
-    var setLabelTime = function () {
+    function setLabelTime () {
         $('.label-countdown').each(function (index, element) {
             var now = new Date().getTime();
             var diff = element.getAttribute("disappears-at") - now;
@@ -256,8 +297,8 @@ $(function() {
         });
     };
 
-    var searchPokemon = function () {
-        var center = map.getCenter();
+    function searchPokemon (position) {
+        var center = position || map.getCenter();
         var data = {
             position: center.toJSON(),
             step_limit: 5
@@ -274,7 +315,6 @@ $(function() {
     };
 
     window.setInterval(setLabelTime, 1000);
-    var searchId = window.setInterval(searchPokemon, 60*1000);
 
     initMap();
 });
