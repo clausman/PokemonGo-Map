@@ -11,7 +11,7 @@ import json
 
 
 from . import config
-from .models import Pokemon, Gym, Pokestop
+from models import Pokemon, Gym, Pokestop
 
 
 class Pogom(Flask):
@@ -43,7 +43,7 @@ class Pogom(Flask):
         return jsonify(self.get_raw_data(None))
 
     def pokemons(self, stamp):
-        return jsonify(self.get_raw_data(stamp)['pokemons'])
+        return jsonify(self.get_raw_data(None)['pokemons'])
 
     def pokemons_all(self):
         return jsonify(self.get_raw_data(None)['pokemons'])

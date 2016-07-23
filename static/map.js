@@ -3,7 +3,7 @@ $(function() {
         marker,
         GeoMarker,
         lastStamp = 0,
-        requestInterval = 10000;
+        requestInterval = 5000;
 
 
     var markers = [];
@@ -119,7 +119,13 @@ $(function() {
     function initMap () {
         map = new google.maps.Map(document.getElementById('map'), {
             center: {lat: center_lat, lng: center_lng},
-            zoom: 16
+            zoom: 16,
+            zoomControl: true,
+            mapTypeControl: false,
+            scaleControl: false,
+            streetViewControl: false,
+            rotateControl: false,
+            fullscreenControl: false
         });
 
         // Create the DIV to hold the control and call the CenterControl()
@@ -297,21 +303,60 @@ $(function() {
         });
     };
 
-    function searchPokemon (position) {
-        var center = position || map.getCenter();
-        var data = {
-            position: center.toJSON(),
-            step_limit: 5
-        };
-        $.post({
-            url: "/search",
-            data: JSON.stringify(data),
-            contentType: "application/json; charset=utf-8",
-            dataType: 'json',
-            success: function () {
-                console.log(center);
+    function generateSearches(num_steps, offset) {
+        num_steps = num_steps || 1;
+        offset = offset || 0.0010;
+
+        var searches = []
+        for (var x = 0; x < num_steps; x++) {
+            for (var y = 0; y < num_steps; y++) {
+                searches.push([offset * x, offset * y]);
+                if (x != 0 || y != 0) {
+                    searches = searches.concat([[-offset * x, -offset * y], [-offset * x, offset * y], [offset * x, -offset * y]])
+                }
             }
+        }
+        return searches;
+    }
+
+    function searchPokemon (position) {
+        var center = (position || map.getCenter()).toJSON();
+        // Generate
+        var searches = generateSearches(5);
+
+        $.each(searches, function(idx, search) {
+            var data = {
+                position: {'lat': center['lat'] + search[0], 'lng': center['lng'] +search[1]},
+                step_limit: 1
+            };
+            $.post({
+                url: "/search",
+                data: JSON.stringify(data),
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function () {
+                    // Add the circle bleep
+                    var circle = new google.maps.Circle({
+                        strokeColor: '#2ECC40',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                        fillOpacity: 0.0,
+                        map: map,
+                        center: data.position,
+                        radius: 5
+                    });
+                    var anim = setInterval(function(){
+                        circle.setRadius(circle.getRadius() + 2);
+                    }, 50);
+                    setTimeout(function(){
+                        clearInterval(anim);
+                        circle.setMap(null);
+                    }, 2000)
+                }
+            });
         })
+
+
     };
 
     window.setInterval(setLabelTime, 1000);

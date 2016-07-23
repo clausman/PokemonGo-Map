@@ -6,13 +6,26 @@ from peewee import Model, SqliteDatabase, InsertQuery, IntegerField,\
                    CharField, FloatField, BooleanField, DateTimeField
 from datetime import datetime
 from base64 import b64encode
+import Queue
+from threading import Thread
 
-from .utils import get_pokemon_name
+from utils import get_pokemon_name
 
 
 db = SqliteDatabase('pogom.db')
 log = logging.getLogger(__name__)
 
+insert_queue = Queue.Queue()
+
+def consume():
+    while True:
+        to_execute = insert_queue.get(True)
+        to_execute.execute()
+
+search_thread = Thread(target=consume)
+search_thread.daemon = True
+search_thread.name = 'search'
+search_thread.start()
 
 class BaseModel(Model):
     class Meta:
@@ -66,7 +79,7 @@ class Pokemon(BaseModel):
 
 class Pokestop(BaseModel):
     IGNORE = True
-    LURED_ONLY = False
+    LURED_ONLY = True
 
     pokestop_id = CharField(primary_key=True)
     enabled = BooleanField()
@@ -171,15 +184,16 @@ def parse_map(map_dict):
 
     if pokemons:
         log.info("Upserting {} pokemon".format(len(pokemons)))
-        InsertQuery(Pokemon, rows=pokemons.values()).upsert().execute()
+        insert_queue.put(InsertQuery(Pokemon, rows=pokemons.values()).upsert())
 
     if pokestops:
         log.info("Upserting {} pokestops".format(len(pokestops)))
-        InsertQuery(Pokestop, rows=pokestops.values()).upsert().execute()
+
+        insert_queue.put(InsertQuery(Pokestop, rows=pokestops.values()).upsert())
 
     if gyms:
         log.info("Upserting {} gyms".format(len(gyms)))
-        InsertQuery(Gym, rows=gyms.values()).upsert().execute()
+        insert_queue.put(InsertQuery(Gym, rows=gyms.values()).upsert())
 
 
 def create_tables():

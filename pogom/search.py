@@ -14,7 +14,7 @@ from pgoapi import PGoApi
 from pgoapi.utilities import f2i, h2f, get_cellid, encode, get_pos_by_name
 
 from . import config
-from .models import parse_map
+from models import parse_map
 
 log = logging.getLogger(__name__)
 
