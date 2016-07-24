@@ -6,18 +6,17 @@ from flask import Flask, jsonify, render_template, request
 from flask.json import JSONEncoder
 from datetime import datetime
 from threading import Thread
-from pogom.search import search
 import json
-
 
 from . import config
 from models import Pokemon, Gym, Pokestop
 
 
 class Pogom(Flask):
-    def __init__(self, import_name, **kwargs):
+    def __init__(self, import_name, searcher, **kwargs):
         super(Pogom, self).__init__(import_name, **kwargs)
         self.json_encoder = CustomJSONEncoder
+        self._searcher = searcher
         self.route("/", methods=['GET'])(self.fullmap)
         self.route("/pokemons/<stamp>", methods=['GET'])(self.pokemons)
         self.route("/pokemons", methods=['GET'])(self.pokemons_all)
@@ -43,7 +42,7 @@ class Pogom(Flask):
         return jsonify(self.get_raw_data(None))
 
     def pokemons(self, stamp):
-        return jsonify(self.get_raw_data(None)['pokemons'])
+        return jsonify(self.get_raw_data(stamp)['pokemons'])
 
     def pokemons_all(self):
         return jsonify(self.get_raw_data(None)['pokemons'])
@@ -63,11 +62,10 @@ class Pogom(Flask):
         else:
             step_limit = 1
 
-        sleep = 0.0
-        search_thread = Thread(target=search, args=(position, step_limit, sleep))
-        search_thread.daemon = True
-        search_thread.name = 'search'
-        search_thread.start()
+        # TODO This is blocking, which is fine for now but would be better async
+        self._searcher.search(position, num_steps=step_limit)
+
+        # TODO Send back any server errors with all messages
         return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 

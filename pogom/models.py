@@ -15,6 +15,7 @@ from utils import get_pokemon_name
 db = SqliteDatabase('pogom.db')
 log = logging.getLogger(__name__)
 
+# TODO Encapsulate this better as this is gross
 insert_queue = Queue.Queue()
 
 def consume():
@@ -22,10 +23,10 @@ def consume():
         to_execute = insert_queue.get(True)
         to_execute.execute()
 
-search_thread = Thread(target=consume)
-search_thread.daemon = True
-search_thread.name = 'search'
-search_thread.start()
+consume_thread = Thread(target=consume)
+consume_thread.daemon = True
+consume_thread.name = 'consume'
+consume_thread.start()
 
 class BaseModel(Model):
     class Meta:

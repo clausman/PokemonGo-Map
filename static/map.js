@@ -140,7 +140,6 @@ $(function() {
             navigator.geolocation.getCurrentPosition(function (position) {
                 var initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 map.setCenter(initialLocation);
-                searchPokemon(initialLocation);
             });
         }
         GeoMarker = new GeolocationMarker(map);
@@ -322,7 +321,7 @@ $(function() {
     function searchPokemon (position) {
         var center = (position || map.getCenter()).toJSON();
         // Generate
-        var searches = generateSearches(5);
+        var searches = generateSearches(3);
 
         $.each(searches, function(idx, search) {
             var data = {
