@@ -306,9 +306,9 @@ $(function() {
         num_steps = num_steps || 1;
         offset = offset || 0.0010;
 
-        var searches = []
-        for (var x = 0; x < num_steps; x++) {
-            for (var y = 0; y < num_steps; y++) {
+        var searches = [];
+        for (var x = num_steps; x >= 0; x--) {
+            for (var y = num_steps; y >= 0; y--) {
                 searches.push([offset * x, offset * y]);
                 if (x != 0 || y != 0) {
                     searches = searches.concat([[-offset * x, -offset * y], [-offset * x, offset * y], [offset * x, -offset * y]])
@@ -323,7 +323,11 @@ $(function() {
         // Generate
         var searches = generateSearches(3);
 
-        $.each(searches, function(idx, search) {
+        function searchHelper(searches) {
+            if (searches.length == 0) {
+                return;
+            }
+            var search = searches.pop();
             var data = {
                 position: {'lat': center['lat'] + search[0], 'lng': center['lng'] +search[1]},
                 step_limit: 1
@@ -350,12 +354,13 @@ $(function() {
                     setTimeout(function(){
                         clearInterval(anim);
                         circle.setMap(null);
-                    }, 2000)
+                    }, 2000);
+                    searchHelper(searches);
                 }
             });
-        })
+        }
 
-
+        searchHelper(searches);
     };
 
     window.setInterval(setLabelTime, 1000);

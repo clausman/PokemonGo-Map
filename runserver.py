@@ -11,7 +11,6 @@ from pogom.app import Pogom
 from pogom.utils import get_args, insert_mock_data, load_credentials
 from pogom.search import Searcher, ApiAuthorizer, Credentials
 from pogom.models import create_tables, Pokemon, Pokestop, Gym
-from pogom.pgoapi.utilities import get_pos_by_name
 
 log = logging.getLogger(__name__)
 
@@ -32,16 +31,9 @@ if __name__ == '__main__':
 
     create_tables()
 
-    position = get_pos_by_name(args.location)
-    log.info('Parsed location is: {:.4f}/{:.4f}/{:.4f} (lat/lng/alt)'.
-             format(*position))
-
-    config['ORIGINAL_LATITUDE'] = position[0]
-    config['ORIGINAL_LONGITUDE'] = position[1]
     config['USERNAME'] = args.username
     config['PASSWORD'] = args.password
     config['AUTH_SERVICE'] = args.auth_service
-    args.position = position
 
     if args.ignore:
         Pokemon.IGNORE = [i.lower().strip() for i in args.ignore.split(',')]
@@ -61,7 +53,7 @@ if __name__ == '__main__':
         Gym.IGNORE = False
 
     authorizer = ApiAuthorizer(Credentials(args.auth_service, args.username, args.password))
-    searcher = Searcher(authorizer, request_sleep=0.0)
+    searcher = Searcher(authorizer, request_sleep=0.5)
 
     app = Pogom(__name__, searcher)
     config['ROOT_PATH'] = app.root_path

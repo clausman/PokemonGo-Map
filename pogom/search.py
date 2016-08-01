@@ -12,7 +12,7 @@ import time
 import threading
 
 from pgoapi import PGoApi
-from pgoapi.utilities import f2i, h2f, get_cellid, encode, get_pos_by_name
+from pgoapi.utilities import get_cell_ids
 
 from . import config
 from models import parse_map
@@ -128,11 +128,10 @@ class Searcher:
         try:
             api = self._api.api()
             api.set_position(*position)
-            api.get_map_objects(latitude=f2i(position[0]),
-                                longitude=f2i(position[1]),
-                                since_timestamp_ms=TIMESTAMP,
-                                cell_id=get_cellid(position[0], position[1]))
-            return api.call()
+            resp = api.get_map_objects(latitude=position[0],
+                                longitude=position[1],
+                                cell_id=get_cell_ids(position[0], position[1]))
+            return resp
         finally:
             self._request_lock.release()
 

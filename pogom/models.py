@@ -142,7 +142,7 @@ def parse_map(map_dict):
         for p in cell.get('wild_pokemons', []):
             pokemons[p['encounter_id']] = {
                 'encounter_id': b64encode(str(p['encounter_id'])),
-                'spawnpoint_id': p['spawnpoint_id'],
+                'spawnpoint_id': p['spawn_point_id'],
                 'pokemon_id': p['pokemon_data']['pokemon_id'],
                 'latitude': p['latitude'],
                 'longitude': p['longitude'],
