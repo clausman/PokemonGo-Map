@@ -20,9 +20,16 @@ def send_to_webhook(message_type, message):
         'message': message
     }
 
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    if args.webhook_secret:
+        headers['Authorization'] = "Basic %s" % args.webhook_secret
+
     for w in args.webhooks:
         try:
-            requests.post(w, json=data, timeout=(None, 1))
+            requests.post(w, json=data, timeout=(None, 1), headers=headers)
         except requests.exceptions.ReadTimeout:
             log.debug('Response timeout on webhook endpoint %s', w)
         except requests.exceptions.RequestException as e:

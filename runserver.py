@@ -129,7 +129,10 @@ def main():
     config['LOCALE'] = args.locale
     config['CHINA'] = args.china
 
-    app = Pogom(__name__)
+    # DB Updates
+    db_updates_queue = Queue()
+
+    app = Pogom(__name__, db_updates_queue)
     db = init_database(app)
     if args.clear_db:
         log.info('Clearing database')
@@ -148,9 +151,6 @@ def main():
     # Setup the location tracking queue and push the first location on
     new_location_queue = Queue()
     new_location_queue.put(position)
-
-    # DB Updates
-    db_updates_queue = Queue()
 
     # Thread(s) to process database updates
     for i in range(args.db_threads):

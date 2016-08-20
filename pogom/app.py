@@ -4,7 +4,7 @@
 import calendar
 import logging
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, Response
 from flask.json import JSONEncoder
 from flask_compress import Compress
 from datetime import datetime
@@ -21,9 +21,10 @@ compress = Compress()
 
 
 class Pogom(Flask):
-    def __init__(self, import_name, **kwargs):
+    def __init__(self, import_name, db_update_queue, **kwargs):
         super(Pogom, self).__init__(import_name, **kwargs)
         compress.init_app(self)
+        self.db_update_queue = db_update_queue
         self.json_encoder = CustomJSONEncoder
         self.route("/", methods=['GET'])(self.fullmap)
         self.route("/raw_data", methods=['GET'])(self.raw_data)
@@ -33,6 +34,7 @@ class Pogom(Flask):
         self.route("/search_control", methods=['GET'])(self.get_search_control)
         self.route("/search_control", methods=['POST'])(self.post_search_control)
         self.route("/stats", methods=['GET'])(self.get_stats)
+        self.route("/webhook", methods=['POST'])(self.webhook)
 
     def set_search_control(self, control):
         self.search_control = control
@@ -225,6 +227,33 @@ class Pogom(Flask):
                                gmaps_key=config['GMAPS_KEY'],
                                valid_input=self.get_valid_stat_input()
                                )
+
+    def webhook(self):
+        """
+        Consumes a webhook post by putting the data into our db
+        :return:
+        """
+        args = get_args()
+        if args.webhook_secret and request.headers.get('authorization') != "Basic %s" % args.webhook_secret:
+            logging.warn("webhook request with invalid authorization header. got secret %s",
+                         request.headers.get('authorization'))
+            return Response('Invalid authorization header', 401, {'WWW-Authenticate': 'Basic realm="Invalid token"'})
+        data = request.get_json()
+        message_type = data['type']
+        message = data['message']
+        if message_type == 'pokemon':
+            pokemons = { 
+                message['encounter_id']: {
+                    'encounter_id': message['encounter_id'],
+                    'spawnpoint_id': message['spawnpoint_id'],
+                    'pokemon_id': message['pokemon_id'],
+                    'latitude': message['latitude'],
+                    'longitude': message['longitude'],
+                    'disappear_time': message['disappear_time']
+                }
+            }
+            self.db_update_queue.put((Pokemon, pokemons))
+        return "success"
 
 
 class CustomJSONEncoder(JSONEncoder):

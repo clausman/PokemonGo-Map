@@ -147,6 +147,7 @@ def get_args():
                         nargs='*', default=False, dest='webhooks')
     parser.add_argument('--webhook-updates-only', help='Only send updates (pokémon & lured pokéstops)',
                         action='store_true', default=False)
+    parser.add_argument('--webhook-secret', help='Secret to include in authorization headers for webhook request')
     parser.add_argument('--wh-threads', help='Number of webhook threads; increase if the webhook queue falls behind',
                         type=int, default=1)
     parser.add_argument('--ssl-certificate', help='Path to SSL certificate file')

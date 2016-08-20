@@ -412,7 +412,7 @@ def parse_map(args, map_dict, step_location, db_update_queue, wh_update_queue):
                         'pokemon_id': p['pokemon_data']['pokemon_id'],
                         'latitude': p['latitude'],
                         'longitude': p['longitude'],
-                        'disappear_time': calendar.timegm(d_t.timetuple()),
+                        'disappear_time': d_t.isoformat(),
                         'last_modified_time': p['last_modified_timestamp_ms'],
                         'time_until_hidden_ms': p['time_till_hidden_ms']
                     }))

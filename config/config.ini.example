@@ -24,6 +24,7 @@
 #proxy:                 # Proxy URL e.g. socks5://127.0.0.1:9050
 #webhook:               # webhook URL (including http://)
 #webhook-updates-only:               # only send updates to webhooks, (excludes gyms & non-lured pokéstops)
+#webhook-secret:        # Secret to include in webhook header. Used for validation of webhook requests
 
 # Webserver settings
 #host:                  # address to listen on (default 127.0.0.1)
