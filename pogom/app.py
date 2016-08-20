@@ -249,7 +249,7 @@ class Pogom(Flask):
                     'pokemon_id': message['pokemon_id'],
                     'latitude': message['latitude'],
                     'longitude': message['longitude'],
-                    'disappear_time': message['disappear_time']
+                    'disappear_time': datetime.strptime(message['disappear_time'], "%Y-%m-%dT%H:%M:%S.%f")
                 }
             }
             self.db_update_queue.put((Pokemon, pokemons))
